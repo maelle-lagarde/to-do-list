@@ -24,13 +24,14 @@ const db = mysql.createConnection({
     port: process.env.DB_PORT,
 })
 
-app.get('/search', (request, response) => {
+// route GET display tasks saved in database.
+app.get('/tasklist', (request, response) => {
     // console.log(request.query, "request");
     // console.log(request, "request");
-    const searchName = `%${request.query.name}%`;
-    const sql = "SELECT * FROM `restaurant` WHERE name LIKE ?";
+    const searchDescription = `%${request.query.description}%`;
+    const sql = "SELECT * FROM `task` WHERE description LIKE ?";
 
-    db.query(sql, [searchName], (error, data) => {
+    db.query(sql, [searchDescription], (error, data) => {
         if (error) {
             console.log('if')
             return response.json(error)
@@ -42,44 +43,47 @@ app.get('/search', (request, response) => {
     })
 });
 
-app.post('/register', (request, response) => {
-    const { firstname, lastname, email, password, role, created_at } = request.body;
+// route POST add task in database.
+app.post('/add-task', (request, response) => {
+    const { description } = request.body;
 
-    const sql = "INSERT INTO `user`(`firstname`, `lastname`, `email`, `password`, `role`, `created_at`) VALUES (?, ?, ?, ?, ?, ?)";
+    const sql = "INSERT INTO `task`(`description`) VALUES (?)";
 
-    db.query(sql, [firstname, lastname, email, password, JSON.stringify(role), created_at], (error, data) => {
+    db.query(sql, [description], (error, data) => {
         if (error) {
             return response.json(error);
         } else {
-            return response.json({ message: 'Utilisateur enregistré avec succès' });
+            return response.json({ message: 'Task saved!' });
         }
     });
 });
 
-app.post('/login', (request, response) => {
-    const { email, password } = request.body;
+// route POST update task saved in database. 
+app.post('/update-task', (request, response) => {
+    const { description } = request.body;
 
-    const sql = "SELECT * FROM `user` WHERE email = ? AND password = ?";
+    const sql = "UPDATE task SET description = description = ? WHERE id =?";
 
-    db.query(sql, [email, password], (error, data) => {
+    db.query(sql, [description], (error, data) => {
         if (error) {
             return response.json(error);
         } else {
-            return response.json({ message: 'Connecté' });
+            return response.json({ message: 'Task updated!' });
         }
     });
 });
 
-app.post('/update', (request, response) => {
-    const { firstname, lastname, email, password } = request.body;
+// route POST delete task from database.
+app.post('/delete-task', (request, response) => {
+    const { description } = request.body;
 
-    const sql = "UPDATE user SET firstname = ?, lastname = ?, email = ?, password = ? WHERE id =?";
+    const sql = "DELETE FROM `task` WHERE id =?";
 
-    db.query(sql, [firstname, lastname, email, password], (error, data) => {
+    db.query(sql, [description], (error, data) => {
         if (error) {
             return response.json(error);
         } else {
-            return response.json({ message: 'Utilisateur mis à jour avec succès' });
+            return response.json({ message: 'Task deleted!' });
         }
     });
 });
